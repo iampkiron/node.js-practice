@@ -4,5 +4,5 @@ exports.pool = mysql.createPool({
   user: "andy",
   port: "3306",
   password: "2@@2@2@5",
-  database: "kakaoTalkDB",
+  database: "todoDB",
 });
