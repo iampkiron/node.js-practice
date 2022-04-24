@@ -80,7 +80,7 @@ exports.isVaildTodo = async function (userIdx, todoIdx) {
       //쿼리
       const isVaildTodoQuery =
         "select * from Todos where todoIdx = ? and userIdx = ? and not(status='D');";
-      const isVaildTodoParams = [userIdx, todoIdx];
+      const isVaildTodoParams = [todoIdx, userIdx];
 
       const [row] = await connection.query(isVaildTodoQuery, isVaildTodoParams);
       return row;
@@ -116,6 +116,30 @@ exports.updateTodo = async function (userIdx, todoIdx, contents, status) {
     }
   } catch (err) {
     console.error(`updateTodo DB error#####`);
+    return false;
+  }
+};
+
+exports.deleteTodo = async function (userIdx, todoIdx) {
+  //DB연결 검사
+  try {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+      //쿼리
+      const deleteTodoQuery =
+        "update Todos set status = 'D' where userIdx = ? and todoIdx = ?;";
+      const deleteTodoParams = [userIdx, todoIdx];
+
+      const [row] = await connection.query(deleteTodoQuery, deleteTodoParams);
+      return row;
+    } catch (err) {
+      console.log(`deleteTodo Query error#####`);
+      return false;
+    } finally {
+      connection.release();
+    }
+  } catch (err) {
+    console.error(`deleteTodo DB error#####`);
     return false;
   }
 };

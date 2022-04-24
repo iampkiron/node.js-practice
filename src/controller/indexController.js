@@ -32,6 +32,7 @@ exports.createTodo = async function (req, res) {
 
 exports.readTodo = async function (req, res) {
   const { userIdx } = req.params;
+
   let todos = {};
   const types = ["do", "delegate", "decide", "delete"];
 
@@ -42,7 +43,7 @@ exports.readTodo = async function (req, res) {
       return res.send({
         isSuccess: false,
         code: 400,
-        message: "잘못된 쿼리입니다.",
+        message: "할 일 조회 실패",
       });
     }
 
@@ -53,7 +54,7 @@ exports.readTodo = async function (req, res) {
     result: todos,
     isSuccess: false,
     code: 400,
-    message: "쿼리 전송 성공",
+    message: "할 일 조회 성공",
   });
 };
 
@@ -77,7 +78,6 @@ exports.selectTodo = async function (req, res) {
   }
 
   const isVaildTodo = await indexDao.isVaildTodo(userIdx, todoIdx);
-
   if (isVaildTodo.length < 1) {
     return res.send({
       isSuccess: false,
@@ -86,16 +86,59 @@ exports.selectTodo = async function (req, res) {
     });
   }
 
-  const updateTodo = await indexDao.updateTodo(
+  const updateTodoRow = await indexDao.updateTodo(
     userIdx,
     todoIdx,
     contents,
     status
   );
 
+  if (!updateTodoRow) {
+    return res.send({
+      isSuccess: false,
+      code: 400,
+      message: "할 일 수정 실패",
+    });
+  }
+
   return res.send({
     isSuccess: true,
     code: 200,
-    message: "쿼리 수정 성공",
+    message: "할 일 수정 성공",
+  });
+};
+
+exports.deleteTodo = async function (req, res) {
+  const { userIdx, todoIdx } = req.params;
+  if (!userIdx || !todoIdx) {
+    return res.send({
+      isSuccess: false,
+      code: 200,
+      message: "잘못된 userIdx, todoIdx 데이터입니다.",
+    });
+  }
+
+  const isVaildTodo = await indexDao.isVaildTodo(userIdx, todoIdx);
+  if (isVaildTodo.length < 1) {
+    return res.send({
+      isSuccess: false,
+      code: 200,
+      message: "유효하지 않은 userIdx, todoIdx 데이터입니다.",
+    });
+  }
+
+  const deleteTodoRow = await indexDao.deleteTodo(userIdx, todoIdx);
+  if (!deleteTodoRow) {
+    return res.send({
+      isSuccess: false,
+      code: 400,
+      message: "할 일 삭제 실패",
+    });
+  }
+
+  return res.send({
+    isSuccess: true,
+    code: 200,
+    message: "할 일 삭제 성공",
   });
 };
